@@ -1,3 +1,10 @@
+# firebase config
+.firebaserc
+database.rules.json
+firebase.json
+.env*
+*/auth0-variables.js
+
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 .idea
 # dependencies

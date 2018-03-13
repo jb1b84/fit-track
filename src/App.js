@@ -8,7 +8,7 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { messages: [] };
+    this.state = { messages: [], users: [] };
   }
 
   componentWillMount() {
@@ -16,7 +16,21 @@ class App extends Component {
     messagesRef.on('child_added', snapshot => {
       let message = { text: snapshot.val(), id: snapshot.key };
       this.setState({ messages: [message].concat(this.state.messages) });
-    })
+    });
+
+    let usersRef = fire.database().ref('users').orderByKey().limitToLast(100);
+    let i = 0;
+
+    usersRef.on('child_added', snapshot => {
+      let userKey = snapshot.val();
+      // let userItem = userKey[Object.keys(userKey)[0]];
+      let user = { name: userKey.name, id: i, email: userKey.email };
+
+      this.setState({ users: [user].concat(this.state.users) });
+
+      i++;
+    });
+
   }
 
   addMessage(e) {
@@ -105,9 +119,16 @@ class App extends Component {
         <form onSubmit={this.addMessage.bind(this)}>
           <input type="text" ref={ el => this.inputEl = el }/>
           <input type="submit"/>
+          <h3>Messages</h3>
           <ul>
             {
               this.state.messages.map( message => <li key={message.id}>{message.text}</li>)
+            }
+          </ul>
+          <h3>Users</h3>
+          <ul>
+            {
+              this.state.users.map( user => <li key={user.id}>{user.name} ({user.email})</li>)
             }
           </ul>
         </form>

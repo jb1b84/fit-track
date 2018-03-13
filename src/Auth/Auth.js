@@ -1,6 +1,7 @@
 import history from '../history';
 import auth0 from 'auth0-js';
 import { AUTH_CONFIG } from './auth0-variables';
+import fire from '../fire';
 
 export default class Auth {
   auth0 = new auth0.WebAuth({
@@ -9,7 +10,7 @@ export default class Auth {
     redirectUri: AUTH_CONFIG.callbackUrl,
     audience: `https://${AUTH_CONFIG.domain}/userinfo`,
     responseType: 'token id_token',
-    scope: 'openid'
+    scope: 'openid profile email'
   });
 
   constructor() {
@@ -17,6 +18,7 @@ export default class Auth {
     this.logout = this.logout.bind(this);
     this.handleAuthentication = this.handleAuthentication.bind(this);
     this.isAuthenticated = this.isAuthenticated.bind(this);
+    this.createUser = this.createUser.bind(this);
   }
 
   login() {
@@ -37,11 +39,19 @@ export default class Auth {
   }
 
   setSession(authResult) {
+    console.log(authResult);
     // Set the time that the access token will expire at
     let expiresAt = JSON.stringify((authResult.expiresIn * 1000) + new Date().getTime());
     localStorage.setItem('access_token', authResult.accessToken);
     localStorage.setItem('id_token', authResult.idToken);
     localStorage.setItem('expires_at', expiresAt);
+
+    // set user info in local storage
+    let payload = authResult.idTokenPayload;
+    localStorage.setItem('name', payload.name);
+    localStorage.setItem('email', payload.email);
+    this.createUser(payload.name, payload.email);
+
     // navigate to the home route
     history.replace('/home');
   }
@@ -60,5 +70,18 @@ export default class Auth {
     // access token's expiry time
     let expiresAt = JSON.parse(localStorage.getItem('expires_at'));
     return new Date().getTime() < expiresAt;
+  }
+
+  createUser(name, email) {
+    let safeEmail = email.split('.').join('');
+
+    const usersRef = fire.database().ref('users/' + safeEmail);
+    const user = {
+      name: name,
+      email: email,
+      userId: safeEmail
+    }
+
+    usersRef.set(user);
   }
 }
