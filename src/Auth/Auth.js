@@ -7,11 +7,13 @@ export default class Auth {
   auth0 = new auth0.WebAuth({
     domain: AUTH_CONFIG.domain,
     clientID: AUTH_CONFIG.clientId,
-    redirectUri: AUTH_CONFIG.callbackUrl,
-    audience: `https://${AUTH_CONFIG.domain}/userinfo`,
-    responseType: 'token id_token',
-    scope: 'openid profile email'
+    redirectUri: 'http://localhost:3000/callback', //AUTH_CONFIG.callbackUrl,
+    audience: 'https://api.fitbit.com/', //`https://${AUTH_CONFIG.domain}/userinfo`,
+    responseType: 'token',
+    scope: 'profile activity heartrate nutrition weight'
   });
+
+  userProfile;
 
   constructor() {
     this.login = this.login.bind(this);
@@ -19,6 +21,9 @@ export default class Auth {
     this.handleAuthentication = this.handleAuthentication.bind(this);
     this.isAuthenticated = this.isAuthenticated.bind(this);
     this.createUser = this.createUser.bind(this);
+
+    this.getAccessToken = this.getAccessToken.bind(this);
+    this.getProfile = this.getProfile.bind(this);
   }
 
   login() {
@@ -42,6 +47,7 @@ export default class Auth {
     console.log(authResult);
     // Set the time that the access token will expire at
     let expiresAt = JSON.stringify((authResult.expiresIn * 1000) + new Date().getTime());
+    console.log('user id ', authResult.userId);
     localStorage.setItem('access_token', authResult.accessToken);
     localStorage.setItem('id_token', authResult.idToken);
     localStorage.setItem('expires_at', expiresAt);
@@ -50,7 +56,7 @@ export default class Auth {
     let payload = authResult.idTokenPayload;
     localStorage.setItem('name', payload.name);
     localStorage.setItem('email', payload.email);
-    this.createUser(payload.name, payload.email);
+    //this.createUser(payload.name, payload.email, payload.picture);
 
     // navigate to the home route
     history.replace('/home');
@@ -72,14 +78,34 @@ export default class Auth {
     return new Date().getTime() < expiresAt;
   }
 
-  createUser(name, email) {
+  getAccessToken() {
+    const accessToken = localStorage.getItem('access_token');
+    if (!accessToken) {
+      throw new Error("No access token found");
+    }
+    return accessToken;
+  }
+
+  getProfile(cb) {
+    let accessToken = this.getAccessToken();
+
+    this.auth0.client.userInfo(accessToken, (err, profile) => {
+      if (profile) {
+        this.userProfile = profile;
+      }
+      cb(err, profile);
+    });
+  }
+
+  createUser(name, email, picture='') {
     let safeEmail = email.split('.').join('');
 
     const usersRef = fire.database().ref('users/' + safeEmail);
     const user = {
       name: name,
       email: email,
-      userId: safeEmail
+      userId: safeEmail,
+      picture: picture
     }
 
     usersRef.set(user);
