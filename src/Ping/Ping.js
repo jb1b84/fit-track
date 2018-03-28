@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Button } from 'react-bootstrap';
 import { API_URL } from './../constants';
 import axios from 'axios';
-import history from '../history';
 
 class Ping extends Component {
   componentWillMount() {
@@ -44,7 +43,6 @@ response_type=token\
   }
 
   render() {
-    const { isAuthenticated } = this.props.auth;
     const { message } = this.state;
 
     return (
@@ -52,7 +50,7 @@ response_type=token\
         <h1>Make a call</h1>
 
             <Button bsStyle="primary" onClick={this.authorizeUrl.bind(this)}>
-              Call
+              Connect
             </Button>
         <h2>{ message }</h2>
       </div>

@@ -6,13 +6,8 @@ import Callback from './Callback/Callback';
 import Profile from './Profile/Profile';
 import Charts from './Charts/Charts';
 import Activity from './Activity/Activity';
+import Ping from './Ping/Ping';
 import history from './history';
-
-const handleAuthentication = ({location}) => {
-  if (/access_token|id_token|error/.test(location.hash)) {
-    //auth.handleAuthentication();
-  }
-}
 
 export const makeMainRoutes = () => {
   return (
@@ -28,6 +23,7 @@ export const makeMainRoutes = () => {
         }}/>
         <Route path="/charts" render={(props) => <Charts {...props} />} />
         <Route path="/activity" render={(props) => <Activity {...props} />}/>
+        <Route path="/ping" render={(props) => <Ping {...props} />}/>
       </div>
     </Router>
   );

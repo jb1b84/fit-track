@@ -1,14 +1,24 @@
 import React, { Component } from 'react';
 import { Panel, ControlLabel, Glyphicon } from 'react-bootstrap';
 import axios from "axios/index";
+import moment from 'moment';
+import history from '../history';
 
 class Profile extends Component {
 
   getFitProfile() {
     console.log('fetching profile');
-    if (localStorage.getItem('access_token')) {
+    if (localStorage.getItem('access_token') && localStorage.getItem('expires_at')) {
       console.log('token found');
       const accessToken = localStorage.getItem('access_token');
+      const expiresAt = localStorage.getItem('expires_at');
+
+      // check if token has expired
+      if (moment().isAfter(expiresAt)) {
+          console.log('token has expired, fetch a new one');
+          history.replace('/ping');
+      }
+
       const headers = {'Authorization': `Bearer ${accessToken}`};
 
       axios.get('https://api.fitbit.com/1/user/2C4GFG/profile.json', { headers })
@@ -20,6 +30,9 @@ class Profile extends Component {
             console.log(error);
           }
         );
+    } else {
+      console.log('nothing found, need to connect');
+      history.replace('/ping');
     }
   }
 
