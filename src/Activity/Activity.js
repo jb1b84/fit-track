@@ -6,22 +6,31 @@ import { DateRangePicker } from 'react-dates';
 import 'react-dates/lib/css/_datepicker.css';
 
 class Activity extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      activity: '',
+      startDate: moment().subtract(1, 'month'),
+      endDate: moment(),
+      filters: {
+        focusedInput: null
+      }
+    };
+
+    this.onClose = this.onClose.bind(this);
+    this.onDatesChange = this.onDatesChange.bind(this);
+    this.onFocusChange = this.onFocusChange.bind(this);
+  }
 
   componentWillMount() {
-    this.setState({
-      activity: '',
-      startDate: moment().subtract(1, 'day'),
-      endDate: moment(),
-      lastStart: '',
-      lastEnd: ''
-    });
-
     // fetch activity
     // this should also be checking for valid token first
-    //this.getActivity();
+    this.getActivityRange();
   }
 
   getActivity() {
+    // needs an "else" for no token
     if (localStorage.getItem('access_token')) {
       const accessToken = localStorage.getItem('access_token');
       const headers = {'Authorization': `Bearer ${accessToken}`};
@@ -42,68 +51,68 @@ class Activity extends Component {
   getActivityRange() {
     const startDate = this.state.startDate.format('YYYY-MM-DD');
     const endDate = this.state.endDate.format('YYYY-MM-DD');
-    const lastStart = this.state.startDate;
-    const lastEnd = this.state.endDate;
-    this.setState({ lastStart, lastEnd });
-    console.log(this.state);
-    console.log(startDate, endDate);
     const uri = `https://api.fitbit.com/1/user/2C4GFG/activities/steps/date/${startDate}/${endDate}.json`;
     const accessToken = localStorage.getItem('access_token');
     const headers = {'Authorization': `Bearer ${accessToken}`};
 
     axios.get(uri, { headers})
       .then(response => {
-        this.setState({activity: response.data.summary});
-        console.log(response);
+        this.setState({activity: response.data['activities-steps']});
+        console.log(response.data);
       })
       .catch(error => {
         console.log(error);
       });
   }
 
-  handleDates(startDate, endDate) {
-    const self = this;
-    this.setState({startDate, endDate});
-    setTimeout(function() {
-      self.getActivityRange();
-    }, 500);
+  onDatesChange({startDate, endDate}) {
+    let state = {...this.state};
+
+    state['endDate'] = endDate;
+    state['startDate'] = startDate;
+
+    this.setState(state);
+
+    if (state['filters']['focusedInput'] == null) {
+      this.getActivityRange();
+    }
   }
 
-  onDatePickerClose(startDate, endDate) {
-    console.log('closed picker');
-    //this.setState({startDate, endDate});
-    /*if (this.state.lastStart && this.state.lastEnd) {
-      // see if already fetched
-      if (this.state.lastStart.format('YYYY-MM-DD') == this.state.startDate.format('YYYY-MM-DD') &&
-        this.state.lastEnd.format('YYYY-MM-DD') == this.state.endDate.format('YYYY-MM-DD')) {
-        console.log('date has not changed. do nothing');
+  onClose({startDate, endDate}) {
+    const previousEndDate = this.state.endDate;
+
+    if (previousEndDate == endDate) {
+      if (startDate > previousEndDate) {
+        const endDate = startDate;
+        this.onDatesChange({ startDate, endDate });
       } else {
-        console.log('cool, the dates are different. get some new data');
-        this.getActivityRange();
+        this.onDatesChange({ startDate, endDate });
       }
-    } else {
-      // nothing fetched previously
-      console.log('nothing previously fetched, grab some data');
-      this.getActivityRange();
-    }*/
-    //this.getActivityRange();
+    }
+  }
+
+  onFocusChange(focusedInput) {
+    let state = {...this.state};
+    state['filters']['focusedInput'] = focusedInput;
+
+    this.setState(state);
   }
 
   render() {
-    const { activity } = this.state;
+    const { startDate, endDate, activity, filters } = this.state;
 
     return (
       <div className="container">
         <DateRangePicker
-          startDate={this.state.startDate}
+          startDate={startDate}
           required={true}
           startDateId="1234"
-          endDate={this.state.endDate}
+          endDate={endDate}
           endDateId="5678"
-          onDatesChange={({ startDate, endDate }) => this.handleDates(startDate, endDate)}
-          focusedInput={this.state.focusedInput}
-          onFocusChange={focusedInput => this.setState({ focusedInput })}
-          onClose={ ({ startDate, endDate }) => this.onDatePickerClose(startDate, endDate) }
+          onDatesChange={this.onDatesChange}
+          focusedInput={filters.focusedInput}
+          onFocusChange={this.onFocusChange}
+          onClose={this.onClose}
           isOutsideRange={() => false}
         />
         Activity area
