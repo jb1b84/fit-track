@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import axios from 'axios/index';
 import moment from 'moment';
 import { DateRangePicker } from 'react-dates';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import 'react-dates/lib/css/_datepicker.css';
 
 class Activity extends Component {
@@ -10,7 +11,7 @@ class Activity extends Component {
     super();
 
     this.state = {
-      activity: '',
+      activity: [],
       startDate: moment().subtract(1, 'month'),
       endDate: moment(),
       filters: {
@@ -57,8 +58,8 @@ class Activity extends Component {
 
     axios.get(uri, { headers})
       .then(response => {
-        this.setState({activity: response.data['activities-steps']});
-        console.log(response.data);
+        //this.setState({activity: response.data['activities-steps']});
+        this.parseData(response.data['activities-steps']);
       })
       .catch(error => {
         console.log(error);
@@ -76,6 +77,20 @@ class Activity extends Component {
     if (state['filters']['focusedInput'] == null) {
       this.getActivityRange();
     }
+  }
+
+  parseData(activity) {
+
+    for (var i=0; i < activity.length; i++) {
+      let stepsStr = activity[i]['value'];
+      let stepsInt = parseInt(stepsStr);
+      if (stepsInt) {
+        activity[i]['steps'] = stepsInt;
+      }
+    }
+
+    this.setState({activity: activity});
+
   }
 
   onClose({startDate, endDate}) {
@@ -115,8 +130,14 @@ class Activity extends Component {
           onClose={this.onClose}
           isOutsideRange={() => false}
         />
-        Activity area
-        <pre>{JSON.stringify(activity, null, 2)}</pre>
+        <ResponsiveContainer width="100%" height={500}>
+          <LineChart data={activity} margin={{ top: 30, right: 50, left: 0 }}>
+            <Line type="monotone" dataKey="steps" stroke="#8884d8" type="natural" label="true"/>
+            <XAxis dataKey="dateTime" />
+            <YAxis />
+            <Tooltip/>
+          </LineChart>
+        </ResponsiveContainer>
       </div>
     )
   }

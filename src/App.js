@@ -65,9 +65,6 @@ class App extends Component {
         <header className="App-header">
           <h1 className="App-title">Fit tracking</h1>
         </header>
-        <p className="App-intro">
-          throw some charts and shit in here
-        </p>
       </div>
     );
   }
