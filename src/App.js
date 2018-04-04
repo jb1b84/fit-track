@@ -55,6 +55,13 @@ class App extends Component {
             <Button
               bsStyle="primary"
               className="btn-margin"
+              onClick={this.goTo.bind(this, 'weight')}
+            >
+              Weight
+            </Button>
+            <Button
+              bsStyle="primary"
+              className="btn-margin"
               onClick={this.goTo.bind(this, 'charts')}
             >
               Charts

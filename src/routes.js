@@ -6,6 +6,7 @@ import Callback from './Callback/Callback';
 import Profile from './Profile/Profile';
 import Charts from './Charts/Charts';
 import Activity from './Activity/Activity';
+import Weight from './Activity/Weight';
 import Ping from './Ping/Ping';
 import history from './history';
 
@@ -23,6 +24,7 @@ export const makeMainRoutes = () => {
         }}/>
         <Route path="/charts" render={(props) => <Charts {...props} />} />
         <Route path="/activity" render={(props) => <Activity {...props} />}/>
+        <Route path="/weight" render={(props) => <Weight {...props} />}/>
         <Route path="/ping" render={(props) => <Ping {...props} />}/>
       </div>
     </Router>

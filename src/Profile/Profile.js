@@ -11,12 +11,16 @@ class Profile extends Component {
     if (localStorage.getItem('access_token') && localStorage.getItem('expires_at')) {
       console.log('token found');
       const accessToken = localStorage.getItem('access_token');
-      const expiresAt = localStorage.getItem('expires_at');
+      const expiresAt = moment.unix(
+        parseInt(localStorage.getItem('expires_at'))
+      );
 
       // check if token has expired
       if (moment().isAfter(expiresAt)) {
-          console.log('token has expired, fetch a new one');
+          console.log('token has expired, fetch a new one', expiresAt);
           history.replace('/ping');
+      } else {
+        console.log('token is good until: ', expiresAt.format());
       }
 
       const headers = {'Authorization': `Bearer ${accessToken}`};
