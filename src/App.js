@@ -18,12 +18,16 @@ class App extends Component {
   }
 
   login() {
+    this.props.auth.login();
   }
 
   logout() {
+    this.props.auth.logout();
   }
 
   render() {
+    const { isAuthenticated } = this.props.auth;
+
     return (
       <div className="App">
         <Navbar fluid>
@@ -38,34 +42,61 @@ class App extends Component {
             >
               Home
             </Button>
-            <Button
-              bsStyle="primary"
-              className="btn-margin"
-              onClick={this.goTo.bind(this, 'profile')}
-            >
-              Profile
-            </Button>
-            <Button
-              bsStyle="primary"
-              className="btn-margin"
-              onClick={this.goTo.bind(this, 'activity')}
-            >
-              Activity
-            </Button>
-            <Button
-              bsStyle="primary"
-              className="btn-margin"
-              onClick={this.goTo.bind(this, 'weight')}
-            >
-              Weight
-            </Button>
-            <Button
-              bsStyle="primary"
-              className="btn-margin"
-              onClick={this.goTo.bind(this, 'charts')}
-            >
-              Charts
-            </Button>
+            {
+              !isAuthenticated() && (
+                <Button
+                  bsStyle="primary"
+                  className="btn-margin"
+                  onClick={this.login.bind(this)}
+                >
+                  Login
+                </Button>
+              )
+            }
+            {
+             isAuthenticated() && (
+               <Button
+                  bsStyle="primary"
+                  className="btn-margin"
+                  onClick={this.goTo.bind(this, 'profile')}
+                >
+                  Profile
+                </Button>
+             )
+            }
+            {
+              isAuthenticated() && (
+                <Button
+                  bsStyle="primary"
+                  className="btn-margin"
+                  onClick={this.goTo.bind(this, 'activity')}
+                >
+                  Activity
+                </Button>
+              )
+            }
+            {
+              isAuthenticated() && (
+                <Button
+                  bsStyle="primary"
+                  className="btn-margin"
+                  onClick={this.goTo.bind(this, 'weight')}
+                >
+                  Weight
+                </Button>
+              )
+            }
+            {
+              isAuthenticated() && (
+                <Button
+                  bsStyle="primary"
+                  className="btn-margin"
+                  onClick={this.logout.bind(this)}
+                >
+                  Logout
+                </Button>
+              )
+            }
           </Navbar.Header>
         </Navbar>
 

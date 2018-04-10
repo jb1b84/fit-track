@@ -7,37 +7,17 @@ import history from '../history';
 class Profile extends Component {
 
   getFitProfile() {
-    console.log('fetching profile');
-    if (localStorage.getItem('access_token') && localStorage.getItem('expires_at')) {
-      console.log('token found');
-      const accessToken = localStorage.getItem('access_token');
-      const expiresAt = moment.unix(
-        parseInt(localStorage.getItem('expires_at'))
+    const headers = {'Authorization': `Bearer ${this.props.auth.getAccessToken()}`};
+
+    axios.get('https://api.fitbit.com/1/user/2C4GFG/profile.json', { headers })
+      .then(response => {
+        this.setProfile(response.data.user);
+      })
+      .catch(error => {
+          this.setState({message: error.message});
+          console.log(error);
+        }
       );
-
-      // check if token has expired
-      if (moment().isAfter(expiresAt)) {
-          console.log('token has expired, fetch a new one', expiresAt);
-          history.replace('/ping');
-      } else {
-        console.log('token is good until: ', expiresAt.format());
-      }
-
-      const headers = {'Authorization': `Bearer ${accessToken}`};
-
-      axios.get('https://api.fitbit.com/1/user/2C4GFG/profile.json', { headers })
-        .then(response => {
-          this.setProfile(response.data.user);
-        })
-        .catch(error => {
-            this.setState({message: error.message});
-            console.log(error);
-          }
-        );
-    } else {
-      console.log('nothing found, need to connect');
-      history.replace('/ping');
-    }
   }
 
   setProfile(user) {
