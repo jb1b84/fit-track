@@ -9,6 +9,7 @@ export default class Auth {
     this.isAuthenticated = this.isAuthenticated.bind(this);
     this.setSession = this.setSession.bind(this);
     this.getAccessToken = this.getAccessToken.bind(this);
+    this.getUserId = this.getUserId.bind(this);
   }
 
   login() {
@@ -72,5 +73,15 @@ response_type=token\
     }
 
     return accessToken;
+  }
+
+  getUserId() {
+    const userId = localStorage.getItem('user_id');
+
+    if (!userId) {
+      throw new Error('No user ID found');
+    }
+
+    return userId;
   }
 }

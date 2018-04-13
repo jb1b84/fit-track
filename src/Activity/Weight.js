@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import axios from 'axios/index';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 class Weight extends Component {
@@ -9,6 +8,8 @@ class Weight extends Component {
     this.state = {
       weightLogs: []
     };
+
+    this.parseResponse = this.parseResponse.bind(this);
   }
 
   componentWillMount() {
@@ -17,22 +18,20 @@ class Weight extends Component {
 
   getWeightLogs() {
     console.log('fetching weight');
-    const startDate = '2018-03-01';
-    const endDate = '2018-04-01';
-    const uri = `https://api.fitbit.com/1/user/2C4GFG/body/log/weight/date/${startDate}/${endDate}.json`;
-    const accessToken = localStorage.getItem('access_token');
-    const headers = {'Authorization': `Bearer ${accessToken}`, 'Accept-Language': 'en_US'};
+    const startDate = '2018-03-12';
+    const endDate = '2018-04-12';
 
-    axios.get(uri, { headers })
-      .then(response => {
-        this.parseResponse(response.data.weight);
-      })
-      .catch(error => {
-        console.log(error);
-      });
+    const endpoint = `/body/log/weight/date/${startDate}/${endDate}.json`;
+    const userId = this.props.auth.getUserId();
+    const accessToken = this.props.auth.getAccessToken();
+
+    this.props.api.makeRequest(userId, endpoint, accessToken, this.parseResponse);
   }
 
-  parseResponse(weightLogs) {
+  parseResponse(dataWeightLogs) {
+    console.log('weight response', dataWeightLogs);
+    const weightLogs = dataWeightLogs.weight;
+
     for (var i=0; i < weightLogs.length; i++) {
       // convert fat to a percentage
       let fat = (weightLogs[i].fat / 100);

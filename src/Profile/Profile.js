@@ -1,26 +1,24 @@
 import React, { Component } from 'react';
 import { Panel, ControlLabel, Glyphicon } from 'react-bootstrap';
-import axios from "axios/index";
-import moment from 'moment';
-import history from '../history';
 
 class Profile extends Component {
 
-  getFitProfile() {
-    const headers = {'Authorization': `Bearer ${this.props.auth.getAccessToken()}`};
+  constructor() {
+    super();
 
-    axios.get('https://api.fitbit.com/1/user/2C4GFG/profile.json', { headers })
-      .then(response => {
-        this.setProfile(response.data.user);
-      })
-      .catch(error => {
-          this.setState({message: error.message});
-          console.log(error);
-        }
-      );
+    this.setProfile = this.setProfile.bind(this);
   }
 
-  setProfile(user) {
+  getFitProfile() {
+    const endpoint = '/profile.json';
+    const userId = this.props.auth.getUserId();
+    const accessToken = this.props.auth.getAccessToken();
+
+    this.props.api.makeRequest(userId, endpoint, accessToken, this.setProfile);
+  }
+
+  setProfile(userData) {
+    const user = userData.user;
     this.setState({ profile: user});
   }
 

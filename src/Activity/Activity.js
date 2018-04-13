@@ -22,6 +22,7 @@ class Activity extends Component {
     this.onClose = this.onClose.bind(this);
     this.onDatesChange = this.onDatesChange.bind(this);
     this.onFocusChange = this.onFocusChange.bind(this);
+    this.parseData = this.parseData.bind(this);
   }
 
   componentWillMount() {
@@ -52,18 +53,12 @@ class Activity extends Component {
   getActivityRange() {
     const startDate = this.state.startDate.format('YYYY-MM-DD');
     const endDate = this.state.endDate.format('YYYY-MM-DD');
-    const uri = `https://api.fitbit.com/1/user/2C4GFG/activities/steps/date/${startDate}/${endDate}.json`;
-    const accessToken = localStorage.getItem('access_token');
-    const headers = {'Authorization': `Bearer ${accessToken}`};
 
-    axios.get(uri, { headers})
-      .then(response => {
-        //this.setState({activity: response.data['activities-steps']});
-        this.parseData(response.data['activities-steps']);
-      })
-      .catch(error => {
-        console.log(error);
-      });
+    const userId = this.props.auth.getUserId();
+    const endpoint = `/activities/steps/date/${startDate}/${endDate}.json`;
+    const accessToken = this.props.auth.getAccessToken();
+
+    this.props.api.makeRequest(userId, endpoint, accessToken, this.parseData);
   }
 
   onDatesChange({startDate, endDate}) {
@@ -79,7 +74,9 @@ class Activity extends Component {
     }
   }
 
-  parseData(activity) {
+  parseData(dataActivity) {
+    console.log('in da  callback');
+    const activity = dataActivity['activities-steps'];
 
     for (var i=0; i < activity.length; i++) {
       let stepsStr = activity[i]['value'];
