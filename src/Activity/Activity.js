@@ -1,6 +1,5 @@
 import 'react-dates/initialize';
 import React, { Component } from 'react';
-import axios from 'axios/index';
 import moment from 'moment';
 import { DateRangePicker } from 'react-dates';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
@@ -19,35 +18,18 @@ class Activity extends Component {
       }
     };
 
+    // required for datepicker
     this.onClose = this.onClose.bind(this);
     this.onDatesChange = this.onDatesChange.bind(this);
     this.onFocusChange = this.onFocusChange.bind(this);
+
+    // api callback
     this.parseData = this.parseData.bind(this);
   }
 
   componentWillMount() {
     // fetch activity
-    // this should also be checking for valid token first
     this.getActivityRange();
-  }
-
-  getActivity() {
-    // needs an "else" for no token
-    if (localStorage.getItem('access_token')) {
-      const accessToken = localStorage.getItem('access_token');
-      const headers = {'Authorization': `Bearer ${accessToken}`};
-
-      const date = '2018-3-19';
-      const uri = `https://api.fitbit.com/1/user/2C4GFG/activities/date/${date}.json`;
-      axios.get(uri, { headers})
-        .then(response => {
-          this.setState({activity: response.data.summary});
-          console.log(response);
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    }
   }
 
   getActivityRange() {

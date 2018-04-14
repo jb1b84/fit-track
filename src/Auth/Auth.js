@@ -51,16 +51,22 @@ response_type=token\
 
   isAuthenticated() {
     // check whether the current time is past the access token's expiry time
-    let expiresAt = moment.unix(
-      parseInt(localStorage.getItem('expires_at'))
+    const expiryDate = localStorage.getItem('expires_at')
+    if (!expiryDate) {
+      console.log('no expiry token');
+      return false;
+    }
+
+    const expiresAt = moment.unix(
+      parseInt(expiryDate)
     );
 
     let notExpired =  moment().isBefore(expiresAt);
     if (notExpired) {
-      console.log('not expired');
+      console.log('not expired', expiresAt.format());
       return true;
     } else {
-      console.log('expired');
+      console.log('expired', expiresAt.format());
       return false;
     }
   }
